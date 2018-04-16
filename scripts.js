@@ -1,6 +1,6 @@
 var platoClient = require('plato-js-client');
 var TripAdvisorCient = require('tripadvisorcontentconnect');
-var platoJsClientUtils = require('plato-js-client/utils.js');
+var platoJsClientUtils = require('plato-js-client/src/utils');
 
 var envs = {
   TABS_TA_ATTRIBUTE_ID: null,
@@ -220,10 +220,11 @@ module.exports = {
 
   processMessage: function(Message) {
     if (typeof Message === 'string') {
-      Message = JSON.parse(message);
+      Message = JSON.parse(Message);
     }
     var ValidEntities = [
       'PropertyBranding',
+      'PropertyAttribute',
       'PropertyAvailability'
     ];
 
@@ -232,12 +233,16 @@ module.exports = {
       if (!Property) {
         return;
       }
-      
+
       envs['TABS_DOMAIN'] = platoJsClientUtils.SNS.Message.getRoot(Message);
 
-      module.exports.updatePropertyAvailability(Property);
+      module.exports.updatePropertyAvailability(Property.id);
     } else {
       return;
     }
+  },
+
+  testDISCO: function() {
+    module.exports.processMessage("{\"entity\":\"PropertyAvailability\",\"id\":14421,\"url\":\"disco.api.tabs-software.co.uk/v2/property/229\",\"action\":\"Insert\",\"time\":\"2018-03-13 10:42:32\",\"olddata\":\"\",\"newdata\":{\"id\":229}}");
   }
 };

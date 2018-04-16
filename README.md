@@ -14,3 +14,8 @@ Update all properties availability
 Alternatively, adding a setting into Tabs2 with the name 'Trip Advisor Feed' and default value of TA_ACCOUNT_NAME|TA_CLIENT_SECRET|TABS_TA_ATTRIBUTE_ID (replacing those with your credentials) will do the same thing.
 
 For the lambda function the only required environment variable is TABS_DOMAIN.
+
+### Uploading to AWS
+```bash
+> zip module.zip -r node_modules scripts.js handler.js
+```
