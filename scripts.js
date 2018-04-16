@@ -1,5 +1,6 @@
 var platoClient = require('plato-js-client');
 var TripAdvisorCient = require('tripadvisorcontentconnect');
+var platoJsClientUtils = require('plato-js-client/utils.js');
 
 var envs = {
   TABS_TA_ATTRIBUTE_ID: null,
@@ -180,7 +181,7 @@ module.exports = {
     });
   },
 
-  checkPropertyWithFilter(Property) {
+  checkPropertyWithFilter: function(Property) {
     var attribute
     var p = new platoClient.FilterCollection({
       object: platoClient.common.Property,
@@ -215,5 +216,28 @@ module.exports = {
         reject(err);
       });
     });
+  },
+
+  processMessage: function(Message) {
+    if (typeof Message === 'string') {
+      Message = JSON.parse(message);
+    }
+    var ValidEntities = [
+      'PropertyBranding',
+      'PropertyAvailability'
+    ];
+
+    if (ValidEntities.indexOf(Message.entity) >= 0) {
+      var Property = platoJsClientUtils.SNS.Message.getPropertyFromMessage(Message);
+      if (!Property) {
+        return;
+      }
+      
+      envs['TABS_DOMAIN'] = platoJsClientUtils.SNS.Message.getRoot(Message);
+
+      module.exports.updatePropertyAvailability(Property);
+    } else {
+      return;
+    }
   }
 };
