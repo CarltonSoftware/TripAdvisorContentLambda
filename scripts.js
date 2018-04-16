@@ -56,18 +56,20 @@ var updateProperty = function(Property, setting) {
     var pb = new platoClient.common.PropertyBranding();
     pb.mutateResponse(Property.primarybranding);
 
-    // Get the branding account id
-    setting.entitysettings.forEach(function(es) {
-      if (es.entity === 'Branding' && es.defaultvalue.length > 0) {
-        envs['TA_ACCOUNT_ID'] = es.defaultvalue;
+    // Get the branding account id if setting is provided
+    if (setting) {
+      setting.entitysettings.forEach(function(es) {
+        if (es.entity === 'Branding' && es.defaultvalue.length > 0) {
+          envs['TA_ACCOUNT_ID'] = es.defaultvalue;
 
-        es.values.forEach(function(sv) {
-          if (sv.entityid == pb.branding.id) {
-            envs['TA_ACCOUNT_ID'] = sv.value;
-          }
-        });
-      }
-    });
+          es.values.forEach(function(sv) {
+            if (sv.entityid == pb.branding.id) {
+              envs['TA_ACCOUNT_ID'] = sv.value;
+            }
+          });
+        }
+      });
+    }
 
     pb.parent = Property;
 
@@ -98,25 +100,31 @@ module.exports = {
         path: 'setting'
       });
 
-        
-      c.fetch().then(function(settings) {
-        var f = settings.filter(function(s) {
-          return s.name === 'Trip Advisor Feed';
+      if (process.env.TA_ACCOUNT_NAME 
+        && process.env.TA_CLIENT_SECRET 
+        && process.env.TABS_TA_ATTRIBUTE_ID
+      ) {
+        resolve();
+      } else {
+        c.fetch().then(function(settings) {
+          var f = settings.filter(function(s) {
+            return s.name === 'Trip Advisor Feed';
+          });
+
+          if (f.length !== 1) {
+            reject(new Error('Trip Advisor Feed setting not found'));
+          }
+
+          f = f.pop();
+          envs['TA_ACCOUNT_NAME'] = f.defaultvalue.split('|')[0];
+          envs['TA_CLIENT_SECRET'] = f.defaultvalue.split('|')[1];
+          envs['TABS_TA_ATTRIBUTE_ID'] = f.defaultvalue.split('|')[2];
+
+          resolve(f);
+        }).catch(function(err) {
+          reject(err);
         });
-
-        if (f.length !== 1) {
-          reject(new Error('Trip Advisor Feed setting not found'));
-        }
-
-        f = f.pop();
-        envs['TA_ACCOUNT_NAME'] = f.defaultvalue.split('|')[0];
-        envs['TA_CLIENT_SECRET'] = f.defaultvalue.split('|')[1];
-        envs['TABS_TA_ATTRIBUTE_ID'] = f.defaultvalue.split('|')[2];
-
-        resolve(f);
-      }).catch(function(err) {
-        reject(err);
-      });
+      }
     });
   },
 
@@ -147,7 +155,6 @@ module.exports = {
         var f = function(index) {
           if (props[index]) {
             updateProperty(props[index], setting).then(function() {
-              console.log(props[index].id, 'updated');
               index++;
               f(index);
             }).catch(function(err) {
