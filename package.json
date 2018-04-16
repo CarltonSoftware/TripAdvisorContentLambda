@@ -1,0 +1,25 @@
+{
+  "name": "tripadvisorcontentlambda",
+  "version": "1.0.0",
+  "description": "Lambda function for updating availability on trip advisor",
+  "main": "index.js",
+  "scripts": {
+    "updatePropertyAvailability": "run-func scripts.js updatePropertyAvailability $PROPERTY_ID",
+    "updateAllPropertyAvailability": "run-func scripts.js updateAllPropertyAvailability",
+    "postinstall": "npm link plato-js-client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarltonSoftware/TripAdvisorContentLambda.git"
+  },
+  "author": "Tabs Software",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CarltonSoftware/TripAdvisorContentLambda/issues"
+  },
+  "homepage": "https://github.com/CarltonSoftware/TripAdvisorContentLambda#readme",
+  "dependencies": {
+    "run-func": "^1.0.2",
+    "tripadvisorcontentconnect": "github:CarltonSoftware/tripadvisorcontentconnect"
+  }
+}
