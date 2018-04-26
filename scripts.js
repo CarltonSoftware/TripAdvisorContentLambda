@@ -77,13 +77,9 @@ var updateProperty = function(Property, setting) {
     pb.getPropertyBookedRanges().then(function(bookedRanges) {
       // Get Listing
       var Listing = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), reference);
-      Listing.get().then(function(L) {
-        Listing.setBookedRanges(bookedRanges).updateBookedRanges().then(function() {
-          console.log('Updated Property', Listing.getPath(), 'availability with', JSON.stringify(bookedRanges));
-          resolve(Listing);
-        }).catch(function(err) {
-          reject(err);
-        });
+      Listing.setBookedRanges(bookedRanges).updateBookedRanges().then(function() {
+        console.log('Updated Property', Listing.getPath(), 'availability with', JSON.stringify(bookedRanges));
+        resolve(Listing);
       }).catch(function(err) {
         reject(err);
       });
