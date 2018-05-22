@@ -142,29 +142,63 @@ module.exports = {
     });
   },
 
+  updateIndex: function(index, props, setting) {
+    if (props[index]) {
+      updateProperty(props[index], setting).then(function() {
+        index++;
+        module.exports.updateIndex(index, props, setting);
+      }).catch(function(err) {
+        console.log(err);
+        index++;
+        module.exports.updateIndex(index, props, setting);
+      });
+    }
+  },
+
   updateAllPropertyAvailability: function() {
     module.exports.connectToTabs();
     module.exports.getTripAdvisorSettings().then(function(setting) {
-
       module.exports.checkPropertyWithFilter().then(function(Collection) {
-        var props = Collection.collection;
-
-        var f = function(index) {
-          if (props[index]) {
-            updateProperty(props[index], setting).then(function() {
-              index++;
-              f(index);
-            }).catch(function(err) {
-              console.log(err);
-              index++;
-              f(index);
-            });
-          }
-        }
-
-        f(0);
+        module.exports.updateIndex(0, Collection.collection, setting);
       }).catch(function(err) {
         console.log(err);
+      });
+    });
+  },
+
+  updateYesterdaysBookings: function() {
+    module.exports.connectToTabs();
+    module.exports.getTripAdvisorSettings().then(function(setting) {
+      var bookings = new platoClient.FilterCollection({
+        object: platoClient.common.Booking,
+        path: 'booking'
+      });
+
+      bookings.page = 1;
+      bookings.limit = 1000;
+      bookings.fields = 'propertyid';
+
+      let attrkey = 'property_attribute' + getEnv('TABS_TA_ATTRIBUTE_ID');
+      let filters = {
+        lastupdatedatetime: 'yesterday/now'
+      };
+      filters[attrkey] = '*';
+      bookings.addFilters([filters]);
+
+      var propIds = [];
+      bookings.fetch().then(function(BCol) {
+        propIds = BCol.map(function(b) {
+          return b.propertyid;
+        }).join('|');
+
+        console.log(BCol.getTotal(), 'bookings found');
+
+        module.exports.checkPropertyWithFilter({ id: propIds }).then(function(Collection) {
+          console.log();
+          module.exports.updateIndex(0, Collection.collection, setting);
+        }).catch(function(err) {
+          console.log(err);
+        });
       });
     });
   },
@@ -190,8 +224,10 @@ module.exports = {
       brandingstatusid: 1
     };
 
-    if (Property) {
+    if (Property instanceof platoClient.common.Property) {
       filters['id'] = Property.id
+    } else if (typeof Property === 'string') {
+      filters['id'] = Property;
     }
 
     filters['attribute' + getEnv('TABS_TA_ATTRIBUTE_ID')] = '*';
@@ -199,7 +235,7 @@ module.exports = {
 
     return new Promise(function(resolve, reject) {
       p.fetch().then(function(Collection) {
-        if (Property) {
+        if (Property instanceof platoClient.common.Property) {
           if (Collection.getTotal() === 1) {
             resolve(Collection.first());
           } else {
