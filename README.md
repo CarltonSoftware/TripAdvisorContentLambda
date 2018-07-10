@@ -19,3 +19,6 @@ For the lambda function the only required environment variable is TABS_DOMAIN.
 ```bash
 > zip module.zip -r node_modules scripts.js handler.js
 ```
+
+### Api Reference
+http://info.rentals.tripadvisor.com/content-connect
