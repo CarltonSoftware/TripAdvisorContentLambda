@@ -76,24 +76,8 @@ var updateProperty = function(Property, setting) {
 
     pb.getPropertyBookedRanges().then(function(bookedRanges) {
       // Get Listing
-      (async function() {
-        try {
-          var L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), reference);
-          var Listing = await L.get();
-        } catch(e) {
-          try {
-            var L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), 'TripAdvisorListingReference' + reference);
-            var Listing = await L.get();
-            console.log('Updating reference!');
-            await Listing.updateReference(reference);
-
-            L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), reference);
-            Listing = await L.get();
-          } catch(e2) {
-            reject(err);
-          }
-        }
-
+      var L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), reference);
+      L.get().then(function(Listing) {
         Listing.setBookedRanges(bookedRanges).updateBookedRanges().then(function() {
           console.log('Updated Property', Listing.getPath(), 'availability with', JSON.stringify(bookedRanges));
           resolve(Listing);
@@ -101,7 +85,24 @@ var updateProperty = function(Property, setting) {
           console.log(err.getStatusCode());
           reject(err);
         });
-      })();
+      }).catch(function(err) {
+        var L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), 'TripAdvisorListingReference' + reference);
+        L.get().then(function(Listing) {
+          console.log('Updating reference!');
+          Listing.updateReference(reference).then(function() {
+            Listing.setBookedRanges(bookedRanges).updateBookedRanges().then(function() {
+              console.log('Updated Property', Listing.getPath(), 'availability with', JSON.stringify(bookedRanges));
+              resolve(Listing);
+            }).catch(function(err) {
+              console.log(err.getStatusCode());
+              reject(err);
+            });
+          });
+        }).catch(function(err) {
+          reject(err);
+        });
+      });
+
     }).catch(function(err) {
       reject(err);
     });
