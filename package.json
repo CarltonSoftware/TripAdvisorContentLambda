@@ -9,7 +9,7 @@
     "updateYesterdaysBookings": "run-func scripts.js updateYesterdaysBookings",
     "DISCO": "run-func scripts.js testDISCO",
     "postinstall": "npm link plato-js-client",
-    "zip": "rm module.zip && zip module.zip -r node_modules scripts.js handler.js"
+    "zip": "rm -f module.zip && zip module.zip -r node_modules scripts.js handler.js"
   },
   "repository": {
     "type": "git",
