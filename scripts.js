@@ -76,13 +76,32 @@ var updateProperty = function(Property, setting) {
 
     pb.getPropertyBookedRanges().then(function(bookedRanges) {
       // Get Listing
-      var Listing = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), reference);
-      Listing.setBookedRanges(bookedRanges).updateBookedRanges().then(function() {
-        console.log('Updated Property', Listing.getPath(), 'availability with', JSON.stringify(bookedRanges));
-        resolve(Listing);
-      }).catch(function(err) {
-        reject(err);
-      });
+      (async function() {
+        try {
+          var L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), reference);
+          var Listing = await L.get();
+        } catch(e) {
+          try {
+            var L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), 'TripAdvisorListingReference' + reference);
+            var Listing = await L.get();
+            console.log('Updating reference!');
+            await Listing.updateReference(reference);
+
+            L = new TripAdvisorCient.Listing(getEnv('TA_ACCOUNT_ID').toString(), reference);
+            Listing = await L.get();
+          } catch(e2) {
+            reject(err);
+          }
+        }
+
+        Listing.setBookedRanges(bookedRanges).updateBookedRanges().then(function() {
+          console.log('Updated Property', Listing.getPath(), 'availability with', JSON.stringify(bookedRanges));
+          resolve(Listing);
+        }).catch(function(err) {
+          console.log(err.getStatusCode());
+          reject(err);
+        });
+      })();
     }).catch(function(err) {
       reject(err);
     });
