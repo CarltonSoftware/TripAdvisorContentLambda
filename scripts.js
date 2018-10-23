@@ -97,6 +97,8 @@ var updateProperty = function(Property, setting) {
               console.log(err.getStatusCode());
               reject(err);
             });
+          }).catch(function(err) {
+            reject(err);
           });
         }).catch(function(err) {
           reject(err);
@@ -162,13 +164,21 @@ module.exports = {
     });
   },
 
+  error: function(e) {
+    if (typeof e.getDescriptions === 'function') {
+      console.log(e.getDescriptions());
+    }
+    
+    console.log(e);
+  },
+
   updateIndex: function(index, props, setting) {
     if (props[index]) {
       updateProperty(props[index], setting).then(function() {
         index++;
         module.exports.updateIndex(index, props, setting);
       }).catch(function(err) {
-        console.log(err);
+        module.exports.error(err);
         index++;
         module.exports.updateIndex(index, props, setting);
       });
@@ -181,7 +191,7 @@ module.exports = {
       module.exports.checkPropertyWithFilter().then(function(Collection) {
         module.exports.updateIndex(0, Collection.collection, setting);
       }).catch(function(err) {
-        console.log(err);
+        module.exports.error(err);
       });
     });
   },
@@ -212,12 +222,12 @@ module.exports = {
         }).join('|');
 
         console.log(BCol.getTotal(), 'bookings found');
+        console.log('Checking properties', propIds);
 
         module.exports.checkPropertyWithFilter({ id: propIds }).then(function(Collection) {
-          console.log();
           module.exports.updateIndex(0, Collection.collection, setting);
         }).catch(function(err) {
-          console.log(err);
+          module.exports.error(err);
         });
       });
     });
