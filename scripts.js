@@ -168,6 +168,9 @@ module.exports = {
     if (typeof e.getDescriptions === 'function') {
       console.log(e.getDescriptions());
     }
+    if (typeof e.getErrors === 'function') {
+      console.log(e.getErrors());
+    }
     
     console.log(e);
   },
