@@ -177,14 +177,17 @@ module.exports = {
 
   updateIndex: function(index, props, setting) {
     if (props[index]) {
-      updateProperty(props[index], setting).then(function() {
-        index++;
-        module.exports.updateIndex(index, props, setting);
-      }).catch(function(err) {
-        module.exports.error(err);
-        index++;
-        module.exports.updateIndex(index, props, setting);
-      });
+      console.log('Waiting');
+      setTimeout(function() {
+        updateProperty(props[index], setting).then(function() {
+          index++;
+          module.exports.updateIndex(index, props, setting);
+        }).catch(function(err) {
+          module.exports.error(err);
+          index++;
+          module.exports.updateIndex(index, props, setting);
+        });
+      }, 5000);
     }
   },
 
