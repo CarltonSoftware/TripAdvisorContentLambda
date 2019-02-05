@@ -8,7 +8,6 @@
     "updateAllPropertyAvailability": "run-func scripts.js updateAllPropertyAvailability",
     "updateYesterdaysBookings": "run-func scripts.js updateYesterdaysBookings",
     "DISCO": "run-func scripts.js testDISCO",
-    "postinstall": "npm link plato-js-client",
     "zip": "rm -f module.zip && zip module.zip -r node_modules scripts.js handler.js"
   },
   "repository": {
@@ -22,6 +21,7 @@
   },
   "homepage": "https://github.com/CarltonSoftware/TripAdvisorContentLambda#readme",
   "dependencies": {
+    "plato-js-client": "github:CarltonSoftware/plato-js-client",
     "run-func": "^1.0.2",
     "tripadvisorcontentconnect": "github:CarltonSoftware/tripadvisorcontentconnect"
   }
